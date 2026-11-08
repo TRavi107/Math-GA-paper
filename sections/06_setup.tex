@@ -1,0 +1,26 @@
+% =====================================================================
+%  Section 6 - Experimental setup (author's edits in 6.2-6.4)
+% =====================================================================
+\section{Experimental Setup}
+\label{sec:setup}
+
+\subsection{Design}
+\label{sec:design}
+
+Every method was run on 30 seeds at each of the four mutation strengths $m \in \{1, 3, 5, 10\}$. Random search does not use mutation, hence it is run once per seed and stage, which gives 1{,}350 runs per stage. Each seed runs the base stage first and then the free stage, where the free stage of each method uses the base reels that method found. During the base stage free games are triggered and counted for the trigger rate, but not played, since the free reels are still random at that point. For each seed, every method starts from the same 10 random reel sets and uses the same simulator seed for every evaluation, the same mutation operator and strength, and the same budget, so on any seed, all twelve methods face exactly the same problem, and all the tests below compare methods seed by seed. Every random number in a run is derived from the seed number, so any run can be repeated exactly.
+
+\paragraph{Computing.} A run of 1000 evaluations plus its re-evaluation takes about 2.5 minutes on 10 threads, and the main study took 83 run-hours, about 14 hours on a 64-core machine running 6 seeds in parallel. The code, the results and the simulator are available at \url{https://anonymous.4open.science/r/XXXX}. \chk{Create the anonymous repository on 12 Nov and paste its link here.}
+
+\subsection{Re-evaluation and Fixed-Base Check}
+\label{sec:reeval}
+
+As explained in Sect.~\ref{sec:noise}, the best score seen inside a run is optimistic. Hence the best reel set of every run is re-simulated with $10^8$ spins, i.e.\ ten times the spins of one evaluation, on a seed the run never used. In the base stage this re-evaluation plays the base game only, and in the free stage it plays the full game. Every error we report in Sect.~\ref{sec:results} is this re-evaluated value.
+
+In the free stage, each method was run using the best base reel set found during its own base-stage run, which can make the free-stage comparison unfair, as some methods start with worse base reels than others. To make the comparison fair, all methods were later run again using the same fixed base reel set, the best one found over all base-stage runs. This fixed-base check covers $m \in \{3, 5, 10\}$ and all eleven methods other than random search, i.e.\ $30 \times 3 \times 11 = 990$ runs. Random search was left out because it is already far behind every other method in the free stage (median error 62.8, against about 1.6 at $m = 3$) and its fully random free reels make every evaluation slow.
+
+\subsection{Statistical Tests}
+\label{sec:stats}
+
+Methods are compared in families, separately for each mutation strength: the three replacement schemes (per seed, the median over their three selection methods), the three selection methods inside each replacement scheme, the nine GA configurations against the three baselines, and the mutation strengths inside each method. Pairs are compared with two-sided Wilcoxon signed-rank tests paired by seed, with Holm correction inside the family and $\alpha = 0.05$. We also report a Friedman test per family, but since Holm correction already controls the chance of any false positive in the family, the pairwise results are not made conditional on it. As effect size we report the Vargha--Delaney $A_{12}$, i.e.\ the probability that one method ends with a lower error than the other on a run, where 0.5 means no difference, with the usual bands: negligible below 0.56, small from 0.56, medium from 0.64 and large from 0.71.
+
+Some differences can be significant and still smaller than what the simulator can measure. Two independent measurements have to differ by $1.96\sqrt{2} \approx 2.77$ standard deviations to be told apart at 95\%. For the noise floor we use a standard deviation of 0.034 for the base stage and 0.10 for the free stage at $10^7$ spins, fixed from an earlier noise measurement before the main experiment. Both are above the largest values in the final noise study (0.030 and 0.093 for random search's reel sets, 0.025 and 0.061 for the other methods), so the floor is conservative. This gives floors of $2.77 \times 0.034/\sqrt{10} = 0.0298$ and $2.77 \times 0.10/\sqrt{10} = 0.088$ at the $10^8$ spins of the re-evaluation. A difference counts as a finding only if it is significant after Holm correction, its $A_{12}$ is at least small, and the gap between the medians is above the noise floor.

@@ -1,0 +1,45 @@
+Search space and two tuning stages
+
+A candidate solution is one reel set x = (r1, . . . , r5), where each strip rj ∈ ΣL
+holds L = 50 symbols from the 9 symbols Σ = {A, . . . , G, W, S}, i.e. a search
+space of 9^250 ≈ 10^238 reel sets. We put no constraint on symbol counts, so a strip
+can hold any number of copies of a symbol, or none.
+
+
+The base and free reels are tuned separately ,tuning first base and then free.
+During base stage three stats (base RTP hitrate and trigger rate) are calculated 
+and tuned. For the free game stage base reels are fixed , changing only free reel set.
+Three stats related to free game i.e free RTP (also depends on base trigger rate T , however keeping base 
+constant make it only dependent to free game) , free hitrate and re trigger rate.
+Also simulation code has been designed in such a way that free game can be run 
+independently and later RTP is calculated by  division with base trigger rate . 
+Doing so save simulation time during high fitness run 
+where lower trigger rate sometimes pushes average free spins to 100s or more (12-13 is ideal average free spins)
+
+Objective
+Each stage has three stats si(x), each with a target ti and a weight wi (Table 2),
+and we minimise the weighted sum of relative errors.
+F(x) = 0 means every target stats are matched exactly. Division of current 
+stat value by target stat value normalizes the value so that total different scaled value
+can also compared. Each stat is multiplied by weight because different stats have 
+impact on the game. RTP whose weight is highest is the value licencing company 
+check and they need them within 1 decimal point accuracy. Similary trigger rate number can 
+be within +=15 or more range as its designer's call. A weighted sum is the simplest way to combine several
+targets and is close to how a mathematician reads a PAR sheet, but it hides the
+trade-off when targets conflict, which happens in the free stage (Sect. 7).
+
+It is frozen within a run. Every evaluation in a run use the same seed , so starting with same 
+reelset always gives same result with fixed error , error behaving as a fixed 
+offset. Even if we re evaluate the reel again we wont gain anything and lucky reelset which got
+lucky score is kept.
+
+It is small by not negligible. The standard deviation of one 10^7 spins estimate of F is around 0.013 
+for base game and around 0.035 for free games and it shrinks as 1/root n. Even though 
+during early run the differencce between good candidate are way above the deviation range
+during end of base stage this is close to gap between good candidate and lucky candidates get
+selected.
+
+The in run best is optimistic . A run reports the lowest score among the 1000 noisy scores,
+favouring the reelset whose noise was lucky. Among 44 combinations 34 combination's score 
+error rose , in some upto 1.63 times. So for every result we re-evaluated the run best 
+reeelset with 10^8 spins on different seed that was never used.

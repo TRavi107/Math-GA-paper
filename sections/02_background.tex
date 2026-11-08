@@ -1,0 +1,69 @@
+% =====================================================================
+%  Section 2 - Background: slot mathematics (author's draft, edited;
+%  shortened 8 Nov for the page limit)
+% =====================================================================
+\section{Background: How a Video Slot Pays}
+\label{sec:background}
+
+The main backbone of a video slot is its reel set. A reel set has several reels, and each reel has a cyclic strip of $L$ symbols. The frequency and position of symbols on the strips decide how big and how frequent the wins can be. During a spin, the game stops each reel at a random position, independently and uniformly, and shows the symbol at the stop and the $N$ symbols below it (Fig.~\ref{fig:reels}).
+
+In our case the reel set has 5 reels, each with a strip of length $L = 50$, i.e.\ $50^5 \approx 3.1 \times 10^8$ equally likely stop combinations, and we show $N = 2$ symbols below the stop, making a $5 \times 3$ window. Changing even a single symbol on a strip alters every window in which that position is visible, i.e.\ 6\% of all windows, so a small change can cause a major shift in the stats of the game.
+
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[
+    font=\scriptsize,
+    cell/.style={draw, minimum width=5.2mm, minimum height=4.4mm, inner sep=0pt},
+    scat/.style={cell, fill=black!15},
+  ]
+  % ---- (a) one reel strip ----
+  \node at (0,2.55) {\textbf{(a)} reel 1 strip};
+  \node at (0,2.15) {$\vdots$};
+  \foreach \y/\pos/\sym in {1.70/17/E, 1.26/18/C, 0.82/19/D, 0.38/20/A, -0.06/21/F, -0.50/22/G, -0.94/23/B}{
+    \node[cell] at (0,\y) {\sym};
+    \node[anchor=east] at (-0.35,\y) {\tiny\pos};
+  }
+  \node at (0,-1.35) {$\vdots$};
+  \draw[very thick] (-0.30,1.04) rectangle (0.30,-0.28);
+  \node[anchor=west, align=left] at (0.40,-0.06) {window\\(3 symbols)};
+  \draw[-{Latex[length=1.6mm]}] (1.55,0.82) -- (0.35,0.82);
+  \node[anchor=west] at (1.58,0.82) {stop $= 19$};
+
+  % ---- (b) the 3x5 window ----
+  \begin{scope}[xshift=4.3cm, yshift=0.38cm]
+    \node at (1.04,2.17) {\textbf{(b)} window after a spin};
+    \node[anchor=east] at (-0.35,1.25) {\tiny reel};
+    \foreach \c in {0,...,4}{
+      \node at (0.52*\c,1.25) {\tiny \the\numexpr\c+1\relax};
+    }
+    % row 0
+    \node[cell] at (0.00, 0.88) {D}; \node[scat] at (0.52, 0.88) {S};
+    \node[cell] at (1.04, 0.88) {F}; \node[cell] at (1.56, 0.88) {B};
+    \node[cell] at (2.08, 0.88) {G};
+    % row 1
+    \node[cell] at (0.00, 0.44) {A}; \node[cell] at (0.52, 0.44) {A};
+    \node[cell] at (1.04, 0.44) {W}; \node[cell] at (1.56, 0.44) {A};
+    \node[cell] at (2.08, 0.44) {E};
+    % row 2
+    \node[cell] at (0.00, 0.00) {F}; \node[cell] at (0.52, 0.00) {C};
+    \node[scat] at (1.04, 0.00) {S}; \node[cell] at (1.56, 0.00) {D};
+    \node[cell] at (2.08, 0.00) {B};
+    % payline 1 (middle row)
+    \draw[very thick, rounded corners=1.5pt] (-0.34,0.70) rectangle (2.42,0.18);
+    \node[anchor=west, align=left] at (2.55,0.44) {payline 1:\\A A W A $\to$ four A};
+  \end{scope}
+\end{tikzpicture}
+\caption{(a) A spin picks a stop on each strip; the window shows that symbol and the next two. (b) The resulting window. On payline~1 the wild~W completes a run of four A's, which pays 100 line bets. Only two scatters (shaded) are visible, so no free games start.}
+\label{fig:reels}
+\end{figure}
+
+\paragraph{How a spin pays.}
+The total bet $B$ is divided over 20 paylines, hence the line bet is $B/20$. Three or more of the same symbol in a row on a payline, counted from the leftmost reel, pays a prize multiplied by the line bet: 20, 100 or 200 for 3, 4 or 5 of A, B or C; 5, 20 or 100 for D or E; and 1, 10 or 50 for F or G. Besides these seven regular symbols there are two special symbols. The wild (W) can substitute for any regular symbol and has its own pays (40, 400 or 1000), and the higher prize is paid when both could pay on the same line. The scatter (S) pays anywhere in the window, at 10, 50 or 500 times the total bet for 3, 4 or 5 scatters. The win of a single spin is capped at $1100B$.
+
+\paragraph{Free games.}
+Three or more scatters anywhere in the window award 10 free spins, played at no extra cost on a separate free reel set, so mathematicians have to manage two reel sets: base and free. Scatters inside the free spins award 10 additional free spins, hence a \emph{retrigger}, so the number of free spins in a round is not fixed.
+
+\paragraph{Stats a mathematician has to maintain.}
+\emph{Return to player} (RTP) is the average amount paid back to the player: a game with an RTP of 95\% pays back 95 dollars for every 100 dollars staked, on average. Total RTP consists of base-game RTP and free-game RTP, both counted per base spin, and our game has a target of 0.95 (0.57 base and 0.38 free). \emph{Hit rate} is quoted as ``1 in $X$'', i.e.\ on average one in every $X$ spins wins something; for a fixed RTP, a larger $X$ means less frequent but bigger wins. \emph{Trigger rate} is the number of base spins per free-game trigger, and \emph{retrigger rate} the number of free spins per retrigger, both also quoted as ``1 in $X$''. These stats are recorded in the game's PAR sheet~\cite{harrigan2009par}. RTP is the number regulators check, and the same game can be released with different RTPs, each with a different reel set~\cite{harrigan2010tight}.
+
+Reel sets are tuned manually by mathematicians: they change the frequency and position of symbols on each strip, run several million simulated spins, check the results and redo the whole process until the desired result is achieved. No change touches only one stat: an extra wild can raise both RTP and hit rate, and an extra scatter makes free games come more often, adds scatter prizes and so raises the overall RTP.

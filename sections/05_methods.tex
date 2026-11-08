@@ -1,0 +1,56 @@
+% =====================================================================
+%  Section 5 - Methods (author's 5.1-5.2, edited)
+% =====================================================================
+\section{Methods}
+\label{sec:methods}
+
+We compare twelve methods: nine GA configurations (three replacement schemes $\times$ three selection operators) and three baselines, i.e.\ random search, hill climbing and simulated annealing (Table~\ref{tab:methods}). All twelve use the same representation, initialisation and mutation (Sect.~\ref{sec:operators}), the same objective (Sect.~\ref{sec:objective}) and the same budget of 1000 evaluations.
+
+\begin{table}[t]
+\centering
+\caption{The twelve methods. $\mu$ is the population size. ``Per step'' is one generation or iteration. Every method spends exactly 1000 evaluations.}
+\label{tab:methods}
+\setlength{\tabcolsep}{4pt}
+\small
+\begin{tabular}{@{}llcclc@{}}
+\toprule
+Method & Selection & $\mu$ & Per step & Survivors & Steps \\
+\midrule
+Steady-state GA     & T / R / SUS & 10 & 2 $\to$ 1   & replaces the worst if better & 1000 \\
+Elitist gen.\ GA    & T / R / SUS & 10 & 8 $\to$ 8   & 2 best + 8 children                & 125 \\
+Generational GA     & T / R / SUS & 10 & 10 $\to$ 10 & 10 children                        & 100 \\
+\midrule
+Hill climbing       & --- & 1 & 1 $\to$ 1 & child, if not worse                           & 1000 \\
+Simulated annealing & --- & 1 & 1 $\to$ 1 & if better, else prob.\ $e^{-\Delta/\tau}$ & 1000 \\
+Random search       & --- & 1 & 0 $\to$ 1 & best so far                                   & 1000 \\
+\bottomrule
+\multicolumn{6}{@{}p{\linewidth}@{}}{\footnotesize T = tournament ($k=3$), R = rank-based roulette wheel, SUS = stochastic universal sampling. ``$a \to b$'': $a$ parents selected, $b$ children evaluated.}
+\end{tabular}
+\end{table}
+
+\subsection{The Genetic Algorithm}
+\label{sec:ga}
+
+The GA starts with 10 random reel sets, the same 10 for every GA combination and for the baselines, and each of them is evaluated once. In each generation, parents are selected, children are created by crossover, each child is mutated and evaluated, and then it is decided which members of the population are replaced. The GA keeps track of the best reel set it has seen so far, since a scheme such as generational replacement can lose its best member.
+
+\paragraph{Selection.}
+All three selection methods only consider the ranking of the population, not the size of the errors, because $F$ is around 90 or more at the beginning and falls below 0.1 at the end, so fitness-proportional selection would work very differently at the start and at the end of a run. \emph{Tournament} ($k = 3$) draws three distinct members at random and selects the best; each parent comes from its own tournament. \emph{Roulette} uses Baker's linear ranking~\cite{baker1985adaptive} with selection pressure $s = 2$, so the best member gets a weight of 2 and the worst a weight of 0, and chooses a single parent per spin. \emph{SUS}~\cite{baker1987reducing} uses the same weights, but places $n$ pointers $\mu/n$ apart from a single random start, where $n$ is the number of parents. So even though Roulette and SUS have the same expected selection count, Roulette can by chance leave the best member out entirely, whereas SUS always selects it when 8 or 10 parents are drawn.
+
+\paragraph{Replacement.}
+The three schemes range from replacing a single worst member to replacing all the members~\cite{dejong1993generation}. \emph{Steady-state} selects 2 parents and produces a single child, which replaces the worst member if it is strictly better, hence the best member is never lost~\cite{whitley1989genitor,syswerda1991study}. \emph{Generational} selects 10 parents and pairs them, each pair creates two children, and the 10 children replace the whole population, hence the best genes can be lost. \emph{Elitist generational} copies the 2 best members as they are and replaces the other 8 by 8 children of 8 parents selected from the whole population.
+
+\subsection{Baselines}
+\label{sec:baselines}
+
+\paragraph{Random search} draws a new random reel set at every evaluation and keeps the best. It uses no mutation, so it is run once per seed and reported under every mutation strength.
+
+\paragraph{Hill climbing} is the (1+1)~EA~\cite{droste2002analysis}. It takes the best reel set among the initial 10, mutates it, and replaces it with the child if the child is at least as good. Apart from accepting ties, hill climbing is the same as a steady-state GA with a population of 1 and no crossover. That makes it the main baseline the GA has to beat: since both use the same mutation, beating hill climbing shows that the population and crossover give an advantage in tuning.
+
+\paragraph{Simulated annealing}~\cite{kirkpatrick1983optimization} is the same as hill climbing, but it can also accept a worse child $y$ of the current reel set $x$, with probability $\exp(-\Delta/\tau)$, where $\Delta = \ln \hat F(y) - \ln \hat F(x)$. The log scale is used because the score falls by about three orders of magnitude during a run, so on a linear scale a fixed temperature would either accept far too much at the end or almost nothing at the beginning. The temperature falls geometrically from $\tau_0 = 0.14$ at the first evaluation to $\tau_{\mathrm{end}} = 0.002$ at the last, and the method returns the best reel set it has seen.
+
+\subsection{Equal Budgets and Parameter Choices}
+\label{sec:fairness}
+
+\paragraph{Same budget.} Every method spends exactly 1000 evaluations after the initial population (Table~\ref{tab:methods}). The ten evaluations of the initial population are made once per seed and shared: the GA starts from all ten and the baselines from the best of them. In the base stage every evaluation plays exactly $10^7$ spins. In the free stage each evaluation plays $\mathrm{round}(10^7/T)$ free rounds, which differs between methods, since each method's free stage uses the base reels that method found: a median of about 125{,}500 rounds for the GA and local-search methods, but about 560{,}000 for random search, whose base reels trigger free games about every 18 spins instead of every 80. The fixed-base check of Sect.~\ref{sec:reeval} removes this difference.
+
+\paragraph{Parameters.} No method was tuned. The GA settings ($\mu = 10$, $k = 3$, $s = 2$, two elites, crossover on every child) are common textbook defaults~\cite{eiben2015introduction}. The annealing temperatures were set once, when the baselines were added to the code, and were not changed afterwards: at $\tau_0 = 0.14$ a child 10\% worse is accepted with probability $\exp(-\ln 1.1/0.14) \approx 0.51$, and at $\tau_{\mathrm{end}} = 0.002$ even a child 1\% worse is accepted with probability below 0.01, so the search ends as a hill climber. So the comparison is between sensible default settings, not between methods each tuned to its limit (Sect.~\ref{sec:discussion}).

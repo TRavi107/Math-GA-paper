@@ -1,0 +1,62 @@
+Genetic algorithm 
+THe ga starts with 10 random parents (keep same parents for all combinations of ga and for 
+baselines too) and evaulated once. In each generation parents are selected , children
+are created from selected parents , children's reelset are mutated
+evaluated and then decided which of the parents can be replaced. GA keeps track of 
+best reelset it has seen so far , since combination such as generatinal scheme 
+can lose its best child.
+Selection : There mainly three method used for the selection of parents in our project.
+On all three operator we only consider the ranking of population exluding the 
+noise size. Ranking was choosen because the score F are in range 80-100 on beginingn
+and falls down to 0.1 during end. So fitness propotional selection will work 
+very differently during start and end.
+Tornament selection(k=3). For this 3 distintn random parents are drawn and best 
+among them is selected .Single parent comes from single draw.
+Roulette selection : Each parents are ranked using baker's linear ranking formula 
+(wρ = (2−s)+2(s−1)(ρ−1)/(μ−1),)with selection presure s =2. Rank 1 is worst rank and u is best rank . Best rank 
+always gets weight of 2 where as worst 0 so worst is never chosen. For rouletter to 
+single parents is chosen during a single spin.
+SUS - Uses same baker's linear ranking method , however instead weight being 
+selection chance , a pointer is place at random start and each parents gets slice
+on the scale. Pointer starting position is based on number of parents to be 
+selection and number of pointers got by parents slice is number of times 
+that specific parents got selected.
+So even though roulette and sus have same expected selection count , routelle 
+does have of best parent not being selected at all where as in sus best always 
+gets selected. This matter on generational replacement as roulette can lose 
+best gene where steady state protects the best genes so its not affected.
+
+Replacement: there are 3 method ranging from replacing all the parents to replacing 
+a single worst parents. Mutation applied on each child that are create where 
+mutation percentage u means replacement of u number of symbols from total 
+symbols count of 250 (5 reelstrip * 50 on each reels)
+Stead state: In this method 2 parents are selected using above mentioned selection 
+method and a single child is produced , the child replaces the the worst parents
+if it better than it. Hence best child is always saved.
+Generational : 10 parents are selected and they are paired togheter  , each pair
+creates a child with total of 10 children. 10 children replaces all of the parents
+Hence best gene can be lost if its not passed on.
+Elitist generation: In this method 2 best parents are copied as it is where are 8 
+other parents are replaced by 8 children created by pairing of remaining 8 parents.
+
+baselines
+Random search draws a new random parent in each generation using same method that
+was used to generate initial 10 parents. No mutation is used during random search 
+and only the best parent is kept. It shows how seer luck (pure rng) is not enough
+to tune the slot.
+
+Hill climbing : It is (1+1 ) Ea . It selects the best parents among the initial parents
+mutate the best one and replace it if its better than the best . hence for hill 
+climing current one is the best one. Hill climing is same as steady state ga with 
+population of 1 and no crossover. That makes it main baseline ga has to beat. 
+Beating hill climbing proves crossover and mutation has any advantage on the tuning.
+
+Simulated annealing: It is same as hill climing hover it has (-delta/r) , where 
+"delta formula" is the probablity of worst child being selected. Log scale is used 
+because score varies from 100s at the beginingn to 0.1s during end improving by 
+3 folds during the run . linear scale would either selecy far too much at end or 
+almost none at begining. The temperature falls geometrically
+from τ0 = 0.14 at the first evaluation to τend = 0.002 at the last, and the method
+returns the best reel set it has seen.
+Both hill climbing and simulated annealing start from the best member of
+the GA’s initial population.

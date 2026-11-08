@@ -1,0 +1,78 @@
+Generational replacement replaces all the parents(meaning no reelset 
+survices unchanged) hence child that replaces them can be worse than parent. 
+Near the end complete replacement of whole generation makes the it worse
+Mutation makes the newer worse with higher mutation having more severe 
+impact.This matches Table 5: the median error of generational replacement rises from 0.185 at m = 1 to 0.707
+at m = 10, while steady-state stays between 0.144 and 0.162. Unlike generational 
+replacement steady and elistism never loses best parents so bad child is just
+one evaluation nothing more.
+
+Selection only matters when best population is not preserved by replacement.
+For example steady state and elistism best piopulation is always preserved
+However with generational selection is the only way good reeel strip reaches
+next generation .  When 10 parents are drawn from 10 members, Tournament (k =
+3) picks the best member 3 times on average and misses it in 0.710 ≈ 3% of
+generations. SUS picks it exactly twice. Roulette also picks it twice on average,
+but misses it in 0.810 ≈ 11% of generations. This is the order we measured:
+Tournament beat SUS from m = 3 upwards, and both beat Roulette at every m.
+
+In the base stage local search is enogh . Hill climbing is steady state ga 
+with on member and no crossover. So only way ga beats it is crossover or the 
+population help , but in base game neither helped. Base rpt depends on frequency 
+of symbols on reel strip and one mutation changes one of the reelset by  1 in 50.
+So without crossover and chain of small steps of mutation lowers the error.
+and hill climbing reaches 0.084 at m = 5 without any way to escape a
+local optimum. We think crossover add very later as during the end the 
+as converged population has very similar reelset and produces similar child 
+but we never measured diversity or ga without crossover.
+
+In free stage a population and annealing helps. Free game's target stats 
+conflict each other so every change makes the some of the stat worse.
+Since hill climing only accepts best child it stays. At m = 3 all six steady-state and elitist configurations beat
+it, e.g. SS + SUS with 1.262 against 1.780. Simulated annealing also works on
+a single reel set, but it accepts some worse children, and no GA configuration
+beats it at any m. So the gain seems to come from keeping or accepting reel sets
+other than the current best, which a population and annealing both do, and not
+from crossover. Hill climbing improves with larger steps, probably because they
+can jump past these points (1.559 at m = 5, 1.527 at m = 10)
+
+Advice to slot mathematician. Start with steady-state ga , an elistism ga or 
+Simulated annealing all three reaches base error of about 0.1 e.g. a base RTP 1% off its
+target. Do not use generational replacement without elitism. Mutation of 3-5 
+performs best above or below that gives worst result.Fourth, re-simulate the final reel set with more spins on a new seed; for SS +
+Tournament at m = 1 the median error rose from 0.047 to 0.076. Fifth, if every
+good method stops at about the same error, as in our free stage (best medians
+1.17 to 1.30), check the targets before changing the optimiser.
+
+Threats to validity. One game, one budget, one population size. We 
+tuned a simplest slot game there is against three stats, more complex game 
+such as cascade or cluster games , with more bonus other than free game 
+such as hold and spin may favour other methods. So this game stats could be 
+calculated exactly with analytical analysis with out the need of simulation, which 
+was not to keep the approach general. Every
+run had 1000 evaluations and μ = 10. A larger budget might let crossover pay
+off, and a larger population gives more diversity but fewer generations; we tested
+neither. 
+
+Untuned methods. The GA used textbook defaults, and the annealing
+temperatures (0.14 to 0.002) were set once and never changed. Tuning could
+change the order among the tied methods, so our claim is about sensible defaults.
+
+Best m chosen on the same seeds. When each method is compared at its own
+best m, the same 30 seeds choose m and measure the result. This favours the GA,
+whose best value is the lowest of 36 configurations (9 × 4 values of m) against 4
+for simulated annealing. The base-stage draw holds despite this, and at a fixed
+m = 5 it is also a draw.
+
+Weighted-sum error and conflicting free targets. he
+weights 10, 6 and 3 are our choice, and other weights could rank reel sets and
+methods differently. Only 16 of 2310 final free reel sets reach an error of 0.25 or
+less, so the free stage compares how methods trade one target against another.
+We did not prove that the free targets cannot all be met; the exact calculation
+could settle this.
+
+Noise floor. Its standard deviations (0.034 and 0.10) come from
+a measurement made before the main experiment, and are above every value in
+the final noise study. So the floor can turn a small real difference into a tie, but
+it does not add findings. The noise study measured only the best reel set of each
+method and m (96 reel sets), not every run.

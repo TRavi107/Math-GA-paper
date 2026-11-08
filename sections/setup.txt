@@ -1,0 +1,21 @@
+6.3 first paragraph
+so on any seed, all twelve methods face exactly the same problem
+
+6.3 2nd paragraph 
+In the free game stage , each method was run using the best 
+base reel set found during coresponding base game run. During 
+so made free game only comparison unfair as some method starts
+with worse base than other . to make the comparison fair later 
+all methods and baseline was run using same fixed base reeelset
+This fixed base check covers 3,5 ,10 mutation and all the eleven methods 
+other than random search.Random search was left out because it does not use 
+the base reels to search, it is already far behind every other method in the 
+free stage (median error 62.8, against about 1.6 for the other methods at m = 3), 
+and its fully random free reels make every evaluation slow.
+
+6.4 2nd paragraph
+A holm p value says if the methodA is better than B but it doesnot say how 
+strong it is , hence we also report the Vargha-delancy effect size A12 he probability that one method ends with
+a lower error than the other on a run, where 0.5 means no difference. We use
+the usual bands: negligible below 0.56, small from 0.56, medium from 0.64 and
+large from 0.71 
