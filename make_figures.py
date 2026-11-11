@@ -1,27 +1,30 @@
 """
-Paper figure (Fig. 2, free-game trade-off) for the EvoApplications submission (LNCS text width 12.2 cm).
+Paper figure (free-game trade-off) for the LNCS text width of 12.2 cm.
 
-Uses the repo's own loader (Optimizer/Stats/Compare.py) so the data handling is
-identical to the published charts; only the styling changes: no titles (the
-LaTeX caption says what the figure shows), vector PDF, 8 pt fonts, and line
-styles / markers that still read in greyscale.
+Standalone: reads the results JSON files directly and needs only matplotlib and pandas.
+No title (the LaTeX caption says what the figure shows), vector PDF, 8 pt fonts, and
+markers and a dark-to-light colour scale that still read in greyscale.
 
-Usage (from the repo root):
-    python paper/make_figures.py Results/results.json Results/results_fixedbase.json paper/figures
+Usage:
+    python make_figures.py [results.json] [results_fixedbase.json] [output_dir]
+
+Defaults: Results/results.json, Results/results_fixedbase.json, figures
 """
+import json
 import os
+import re
 import sys
 
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+import pandas as pd
 from matplotlib.colors import LogNorm, LinearSegmentedColormap
 
-REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.insert(0, os.path.join(REPO, "Optimizer", "Stats"))
-import Compare as C  # noqa: E402
-
 TEXT_W = 12.2 / 2.54          # LNCS text width in inches
+HIT_TARGET = 2.7              # free hit rate, "1 in X"
+RETRIGGER_TARGET = 60.0       # retrigger rate, "1 in X"
+
 plt.rcParams.update({
     "font.size": 8, "axes.labelsize": 8, "axes.titlesize": 8, "legend.fontsize": 7,
     "xtick.labelsize": 7, "ytick.labelsize": 7, "axes.linewidth": 0.6,
@@ -29,47 +32,73 @@ plt.rcParams.update({
     "axes.spines.top": False, "axes.spines.right": False,
 })
 
-# (label, colour, line style, marker) - colour-blind safe and distinct in greyscale
-STYLE = {
-    "SteadyState":          ("Steady-state GA",        "#0072B2", "-",              "o"),
-    "ElistismGenerational": ("Elitist generational GA", "#E69F00", "--",             "s"),
-    "Generational":         ("Generational GA",        "#009E73", ":",              "^"),
-    "HillClimbing":         ("Hill climbing",          "#CC79A7", "-.",             "D"),
-    "SimulatedAnnealing":   ("Simulated annealing",    "#000000", (0, (5, 1, 1, 1)), "v"),
-    "RandomSearch":         ("Random search",          "#999999", (0, (1, 1)),      None),
-}
-ORDER = list(STYLE)
 
-def free_tradeoff(both_json, fixed_json, out_dir):
-    """Free stage: hit-rate error vs retrigger-rate error of every final free reel set."""
-    frames = []
-    for tag, path in (("Own base reels", both_json), ("Fixed base reels", fixed_json)):
-        d, _ = C.load(path, "free")
-        d = d[(d.strategy != "RandomSearch") & d.final_check.notna()]
-        frames.append(d.assign(source=tag))
-    import pandas as pd
-    d = pd.concat(frames, ignore_index=True).dropna(subset=["err_freeHitRate", "err_freeReTriggerRate"])
-    hit_ok = d.err_freeHitRate.abs() <= 5
-    a = (~hit_ok) & (d.err_freeHitRate < 0) & (d.err_freeReTriggerRate.abs() <= 15)
-    b = hit_ok & (d.err_freeReTriggerRate < -25)
+def load_free_runs(path, source):
+    """One row per free-stage run with a re-evaluated final value, random search excluded.
+
+    File layout: raw["seed_<n>_free"]["results"]["mutation_<m>"]["<Strategy>_<Selection>"],
+    and each run's final re-evaluation is its "bestSpin" entry with source "finalCheck".
+    """
+    with open(path, encoding="utf-8") as f:
+        raw = json.load(f)
+    rows = []
+    for seed, seed_entry in raw.items():
+        if not re.fullmatch(r"seed_\d+_free", seed):
+            continue
+        for mut_key, combos in seed_entry["results"].items():
+            if not re.fullmatch(r"mutation_\d+", mut_key):
+                continue
+            for combo, entry in combos.items():
+                strategy, selection = combo.split("_", 1)
+                best = entry.get("bestSpin") or {}
+                if strategy == "RandomSearch" or best.get("source") != "finalCheck" \
+                        or best.get("fitness") is None:
+                    continue
+                sim = best["simOutput"]
+                rows.append({
+                    "source": source, "seed": seed, "mutation": int(mut_key.split("_")[1]),
+                    "strategy": strategy, "selection": selection, "final": float(best["fitness"]),
+                    "hit_err": (sim["freeHitRate"] - HIT_TARGET) / HIT_TARGET * 100,
+                    "retrigger_err": (sim["freeReTriggerRate"] - RETRIGGER_TARGET) / RETRIGGER_TARGET * 100,
+                    "stored_hit_err": best["errorPercent"]["freeHitRate"],
+                    "stored_retrigger_err": best["errorPercent"]["freeReTriggerRate"],
+                })
+    return pd.DataFrame(rows)
+
+
+def free_tradeoff(main_json, fixed_json, out_dir):
+    """Hit-rate error against retrigger-rate error of every final free reel set."""
+    d = pd.concat([load_free_runs(main_json, "Own base reels"),
+                   load_free_runs(fixed_json, "Fixed base reels")], ignore_index=True)
+
+    # The errors computed here must agree with the ones the optimiser stored (4 decimals).
+    worst = max((d.hit_err - d.stored_hit_err).abs().max(),
+                (d.retrigger_err - d.stored_retrigger_err).abs().max())
+    if worst > 1e-3:
+        sys.exit(f"Computed errors differ from the stored errorPercent by up to {worst:.4f}")
+
+    hit_ok = d.hit_err.abs() <= 5
+    a = (d.hit_err < -5) & (d.retrigger_err.abs() <= 15)
+    b = hit_ok & (d.retrigger_err < -25)
 
     fig, ax = plt.subplots(figsize=(TEXT_W, 0.5 * TEXT_W))
     norm = LogNorm(vmin=max(d.final.min(), 0.02), vmax=d.final.quantile(0.98))
-    for tag, mk in (("Own base reels", "o"), ("Fixed base reels", "^")):
+    cmap = LinearSegmentedColormap.from_list("err", ["#08306b", "#4a7fc1", "#c8c8c8"])
+    for tag, marker in (("Own base reels", "o"), ("Fixed base reels", "^")):
         g = d[d.source == tag]
-        sc = ax.scatter(g.err_freeHitRate, g.err_freeReTriggerRate, c=g.final, cmap=LinearSegmentedColormap.from_list("err", ["#08306b", "#4a7fc1", "#c8c8c8"]),
-                        norm=norm, s=6, marker=mk, edgecolor="none", alpha=0.8, label=tag)
+        sc = ax.scatter(g.hit_err, g.retrigger_err, c=g.final, cmap=cmap, norm=norm, s=6,
+                        marker=marker, edgecolor="none", alpha=0.8, label=tag)
     ax.axhline(0, color="#555555", lw=0.6)
     ax.axvline(0, color="#555555", lw=0.6)
     ax.scatter([0], [0], marker="*", s=70, color="#D55E00", edgecolor="white", lw=0.6, zorder=5,
                label="Target")
     ax.annotate(f"A: wins too often,\nretrigger on target ({a.mean():.0%})",
-                xy=(d[a].err_freeHitRate.median(), d[a].err_freeReTriggerRate.median()),
+                xy=(d[a].hit_err.median(), d[a].retrigger_err.median()),
                 xytext=(0.03, 0.97), textcoords="axes fraction", va="top",
                 bbox=dict(boxstyle="round,pad=0.25", fc="white", ec="#cccccc", lw=0.5),
                 arrowprops=dict(arrowstyle="->", lw=0.6, color="#333333"))
     ax.annotate(f"B: hit rate on target,\nretriggers too often ({b.mean():.0%})",
-                xy=(d[b].err_freeHitRate.median(), d[b].err_freeReTriggerRate.median()),
+                xy=(d[b].hit_err.median(), d[b].retrigger_err.median()),
                 xytext=(0.36, 0.42), textcoords="axes fraction", va="top",
                 bbox=dict(boxstyle="round,pad=0.25", fc="white", ec="#cccccc", lw=0.5),
                 arrowprops=dict(arrowstyle="->", lw=0.6, color="#333333"))
@@ -79,24 +108,22 @@ def free_tradeoff(both_json, fixed_json, out_dir):
     cb.set_label("Final error (log)")
     cb.outline.set_visible(False)
     ax.legend(loc="lower left", frameon=True, framealpha=0.9, edgecolor="#cccccc", markerscale=1.6)
-    fig.tight_layout()
-    print(f"[paper] trade-off: {len(d)} reel sets, A {a.mean():.1%}, B {b.mean():.1%}, "
-          f"error <= 0.25: {(d.final <= 0.25).sum()}")
-    return _save(fig, out_dir, "free_tradeoff")
+    fig.tight_layout(pad=0.2)
 
+    print(f"trade-off: {len(d)} reel sets "
+          f"({(d.source == 'Own base reels').sum()} own base, {(d.source == 'Fixed base reels').sum()} fixed base), "
+          f"A {a.mean():.1%}, B {b.mean():.1%}, error <= 0.25: {(d.final <= 0.25).sum()}")
 
-def _save(fig, out_dir, name):
     os.makedirs(out_dir, exist_ok=True)
-    pdf = os.path.join(out_dir, name + ".pdf")
-    fig.savefig(pdf, bbox_inches="tight", pad_inches=0.02)
-    fig.savefig(os.path.join(out_dir, name + ".png"), dpi=200, bbox_inches="tight", pad_inches=0.02)
+    pdf = os.path.join(out_dir, "free_tradeoff.pdf")
+    fig.savefig(pdf, metadata={"Creator": None, "Producer": None, "CreationDate": None})
     plt.close(fig)
-    print(f"[paper] wrote {pdf}")
-    return pdf
+    print(f"wrote {pdf}")
 
 
 if __name__ == "__main__":
-    if len(sys.argv) != 4:
+    args = sys.argv[1:]
+    if len(args) > 3:
         sys.exit(__doc__)
-    base_json, fixed_json, out = sys.argv[1:]
-    free_tradeoff(base_json, fixed_json, out)
+    defaults = ["Results/results.json", "Results/results_fixedbase.json", "figures"]
+    free_tradeoff(*(args + defaults[len(args):]))

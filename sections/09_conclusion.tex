@@ -1,0 +1,8 @@
+% =====================================================================
+%  Section 9 - Conclusion (author's version, facts checked)
+%  The \section heading and label are in main.tex.
+% =====================================================================
+
+We have compared 9 configurations of GA with hill climbing, simulated annealing and random search. Every method was given an equal budget of 1000 evaluations, and all of them were run on 30 seeds and 4 mutation strengths. In the base stage, no GA configuration could conclusively beat local search, with the best GA coming as close as a median error of 0.076 against simulated annealing's 0.075. Generational replacement was worse, losing to steady-state replacement on 30 of 30 seeds at $m = 10$. In the base stage, every generational configuration lost to local search at $m = 5$ and 10. In the free stage, all six steady-state and elitist configurations beat hill climbing at $m = 3$, but no GA could beat simulated annealing at any $m$.
+
+Four steps to follow. Multi-objective tuning of the free game could show the trade-off between its targets, since only 16 of 2310 final reel sets reached an error of 0.25 or less. More complex bonus features such as hold-and-spin and game types such as cascade and cluster would test whether these results hold elsewhere. Tuned baselines would show whether the order among the tied methods changes. A GA without crossover, together with a diversity measure, would show whether the population or crossover produces the free-stage gain.

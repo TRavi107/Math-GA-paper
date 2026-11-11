@@ -131,7 +131,8 @@ Four short paragraphs, each ending with one sentence on how this paper differs. 
 - [ ] Evolutionary optimisation under noise (resampling, re-evaluation, selection bias)
 - [ ] Slot machine mathematics, PAR sheets, RTP design
 - [ ] Steady-state vs generational GAs, takeover time
-- [ ] 15 to 25 references in total, every entry checked on DBLP
+- [ ] 15 to 25 references in total, every entry checked on DBLP (24 now; the 11 new ones in `refs.bib` are confirmed through Crossref only, and `morosan2017automated` needs its LNCS volume)
+- [ ] TODO: read `sections/03_related.tex` aloud and adjust anything that does not sound like you (closing sentences are yours; the earlier sentences were reworded by Claude to match them)
 
 ### Section 1: Introduction (1 page)
 

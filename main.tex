@@ -3,7 +3,7 @@
 %  Springer LNCS: put llncs.cls and splncs04.bst next to this file
 %  (Overleaf's "Springer LNCS" template already has both).
 % =====================================================================
-\documentclass[runningheads]{llncs}
+\documentclass[runningheads,a4paper]{llncs}
 
 \usepackage[T1]{fontenc}
 \usepackage{amsmath,amssymb}
@@ -34,21 +34,21 @@ When Does a Genetic Algorithm Beat Local Search?}
 \maketitle
 
 \begin{abstract}
-\chk{Abstract, about 150 words, written last.}
+\input{sections/00_abstract}
 \keywords{genetic algorithms \and noisy optimisation \and simulation-based optimisation \and game design \and slot machines}
 \end{abstract}
 
 % ---------------------------------------------------------------------
 \section{Introduction}
 \label{sec:intro}
-\chk{Section 1: problem, why tuning is hard (cost per evaluation, noise), three contributions.}
+\input{sections/01_intro}
 
 \input{sections/02_background}
 
 % ---------------------------------------------------------------------
 \section{Related Work}
 \label{sec:related}
-\chk{Section 3: search-based game balancing and PCG; evolutionary optimisation under noise; slot reel-strip and RTP design; steady-state vs generational GAs and takeover time.}
+\input{sections/03_related}
 
 \input{sections/04_problem}
 
@@ -63,11 +63,11 @@ When Does a Genetic Algorithm Beat Local Search?}
 % ---------------------------------------------------------------------
 \section{Conclusion}
 \label{sec:conclusion}
-\chk{Section 9, including multi-objective tuning of the free game as future work.}
+\input{sections/09_conclusion}
 
 % ---------------------------------------------------------------------
 \subsubsection*{Use of AI Tools.}
-\chk{Required statement: AI tools helped with the code, the analysis scripts and the writing.}
+AI tools helped with the code, the analysis scripts and the writing.
 
 \bibliographystyle{splncs04}
 \bibliography{refs}

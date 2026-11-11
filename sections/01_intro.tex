@@ -1,0 +1,21 @@
+% =====================================================================
+%  Section 1 - Introduction (author's version, facts checked)
+%  The \section heading and label are in main.tex.
+% =====================================================================
+
+A video slot is defined and controlled by its reel set, a set of strips of symbols. Hence mathematicians have to tune each reel set by hand to control the return to player (RTP) of the game.
+
+There are three main difficulties in tuning. First, a large search space of $9^{250}$ possible reel sets. Second is noisy simulation. Each evaluation of $10^7$ spins gives an error with a standard deviation of around 0.013 for a good base reel set, which is close to the gap between good candidates. Third, there are several targets, and changing one symbol can alter all of them.
+
+A genetic algorithm (GA)~\cite{balabanov2015slot} and local search~\cite{kamanas2021slot} both were used to tune reel sets. Since a GA needs more design choices, such as a population, a selection method, a replacement scheme and crossover, we have asked whether a GA outperforms local search with this extra complexity.
+
+The game has 5 reels, 20 paylines, 9 symbols and two game stages. Each stage is tuned separately. A total of 9 GA configurations are compared against hill climbing, simulated annealing and random search, over 30 paired seeds and 4 mutation strengths. Every method had 1000 evaluations, and the best reel set of every run was re-evaluated with $10^8$ spins on a new seed. In the base stage, the best GA and simulated annealing reach median errors of 0.076 and 0.075, and no GA configuration is significantly better than either local search method. Generational replacement is the worst scheme: when 10 of the 250 positions are mutated, it loses to steady-state replacement on 30 of 30 seeds. In the free stage, the targets appear to conflict, and only 16 of 2310 final reel sets reach an error of 0.25 or less.
+
+Our contributions are:
+\begin{itemize}
+\item A comparison of twelve methods for tuning reel sets, with equal budgets and paired seeds, where every finding must also be larger than the noise floor.
+\item Evidence that replacement decides how well a GA performs, that selection matters mainly when the best member is not kept, and that the best GA configurations only tie local search in the base stage.
+\item A noise study that measures how optimistic the in-run best error is, and a fixed-base check showing that the free-stage findings do not come from the base reels.
+\end{itemize}
+
+Sections~\ref{sec:background} and~\ref{sec:related} give the background and related work, Sects.~\ref{sec:problem}--\ref{sec:setup} the problem, methods and setup, and Sects.~\ref{sec:results}--\ref{sec:conclusion} the results, discussion and conclusion.

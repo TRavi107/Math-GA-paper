@@ -7,7 +7,7 @@
 \subsection{Search Space and Two Tuning Stages}
 \label{sec:space}
 
-A candidate solution is one reel set $x = (r_1, \dots, r_5)$, where each strip $r_j \in \Sigma^{L}$ holds $L = 50$ symbols from the 9 symbols $\Sigma = \{\mathrm{A}, \dots, \mathrm{G}, \mathrm{W}, \mathrm{S}\}$, i.e.\ a search space of $9^{250} \approx 10^{238}$ reel sets. We put no constraint on symbol counts, so a strip can hold any number of copies of a symbol, or none.
+A candidate solution is one reel set $x = (r_1, \dots, r_5)$, where each strip $r_j \in \Sigma^{L}$ holds $L = 50$ symbols from the 9 symbols $\Sigma = \{\mathrm{A}, \dots, \mathrm{G}, \mathrm{W}, \mathrm{S}\}$. We put no constraint on symbol counts, so a strip can hold any number of copies of a symbol, or none.
 
 The base and free reels are tuned separately, first the base reels and then the free reels. During the base stage, the three base stats (base RTP, hit rate and trigger rate) are calculated and tuned. For the free stage the base reels are fixed and only the free reel set changes. The three free stats are free RTP, free hit rate and retrigger rate. Free RTP also depends on the base trigger rate $T$, but keeping the base reels constant makes it depend only on the free reels.
 
@@ -45,4 +45,4 @@ Since every stat comes from a finite number of spins, the score is noisy. Every 
 \subsection{Initialisation and Variation Operators}
 \label{sec:operators}
 
-A random reel set puts one copy of every symbol on each strip, fills the other 41 positions at random and shuffles the strip. Mutation picks $m \in \{1, 3, 5, 10\}$ of the 250 positions without replacement and changes each one to a different random symbol. The GA, hill climbing and simulated annealing all use this same mutation, so any difference between them comes from the population and crossover. Crossover works reel by reel: for each reel a cut point $c \in \{1, \dots, L-1\}$ is drawn, and the child takes the first $c$ symbols from one parent and the rest from the other. Every child gets crossover first and then mutation.
+A random reel set puts one copy of every symbol on each strip, fills the other 41 positions at random and shuffles the strip. Mutation picks $m \in \{1, 3, 5, 10\}$ of the 250 positions without replacement and changes each one to a different random symbol. The GA, hill climbing and simulated annealing all use this same mutation, so any difference between them comes from the population, crossover and the acceptance rule. Crossover works reel by reel: for each reel a cut point $c \in \{1, \dots, L-1\}$ is drawn, and the child takes the first $c$ symbols from one parent and the rest from the other. Every child gets crossover first and then mutation.
