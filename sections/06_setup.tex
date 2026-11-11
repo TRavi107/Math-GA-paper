@@ -9,7 +9,7 @@
 
 Every method was run on 30 seeds at each of the four mutation strengths $m \in \{1, 3, 5, 10\}$. Random search does not use mutation, hence it is run once per seed and stage, which gives 1{,}350 runs per stage. Each seed runs the base stage first and then the free stage, where the free stage of each method uses the base reels that method found. During the base stage free games are triggered and counted for the trigger rate, but not played, since the free reels are still random at that point. For each seed, every method starts from the same 10 random reel sets and uses the same simulator seed for every evaluation, the same mutation operator and strength, and the same budget, so on any seed, all twelve methods face exactly the same problem, and all the tests below compare methods seed by seed. Every random number in a run is derived from the seed number, so any run can be repeated exactly.
 
-\paragraph{Computing.} A run of 1000 evaluations plus its re-evaluation takes about 2.5 minutes on 10 threads, and the main study took 83 run-hours, about 14 hours on a 64-core machine running 6 seeds in parallel. The code, the results and the simulator are available at \url{https://anonymous.4open.science/r/XXXX}. \chk{Create the anonymous repository on 12 Nov and paste its link here.}
+\paragraph{Computing.} A run of 1000 evaluations plus its re-evaluation takes about 2.5 minutes on 10 threads, and the main study took 83 run-hours, about 14 hours on a 64-core machine running 6 seeds in parallel. The code, the results and the simulator are available at \url{https://osf.io/bw32t/overview?view_only=06e35aa867254e2da2c94bcfc0450f67}.
 
 \subsection{Re-evaluation and Fixed-Base Check}
 \label{sec:reeval}
